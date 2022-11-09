@@ -74,25 +74,31 @@ Onde:
 
 - `RTT_Handler`:
   - Deve gerar uma frequência de 10Hz para inicializar a conversão do AFEC (`afec_start_software_conversion(AFEC_...)`
+  
 - `afec_callback`:
   - Funcão de callback do afec que indica que o valor está pronto, deve enviar o valor lido para a fila `xQueueAFEC`
+  
 - `xQueueAFEC`:
   - Fila de inteiro (uint) para envio dos dados lidos do potênciometro.
+  
 - `task_afec`
     - Configura o RTT em 10Hz 
     - Possui uma fila `xQueueAFEC` para recebimento do valor analógico convertido
     - Chama a função `wheel` para converter um inteiro do AFEC em `RGB`
     - Envia o valor `RGB` para a `task_led` via a fila `xQueueRGB`
+    
 - `xQueueRGB` 
     - Fila que possibilita o envio e recebimento do valor RGB
+    
   - `task_led`
     - Configura os três pinos para operar com PWM0
     - Configura os canais (`0`, `1` e `2`) do PWM0
     - recebe um dado na fila `xQueueRGB` e altera o duty cycle de cada PWM de acordo com o valor recebido
-- `whell`
-    - Função que converte um valor analógico (0..4095) em RGB (0..255, 0..255, 0..255)
-    - Use como base a seguinte função extraída de um código do arduino:
     
+- `whell`
+    - Função que converte um valor analógico (0..255) em RGB (0..255, 0..255, 0..255)
+    - Use como base a seguinte função extraída de um código do arduino:
+ 
     ```c
     // Input a value 0 to 255 to get a color value.
     // The colours are a transition r - g - b - back to r.
@@ -110,10 +116,11 @@ Onde:
       }
     }
     ```
-
+ 
     - Note que o input da função é um byte, ou seja, de `0..255` e o nosso analógico é um valor de `0..4095`
     - Não possuímos a função  `setColor(char, r, char g, char b)`, a nossa função `wheel` deve retornar o RGB para enviarmos para a fila
-    - DICA: a função deve possuir a seguinte implementacão `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
+    - DICA: a função deve possuir a seguinte prototipacacao `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
+    - **DICA: no código já tem a função definida, você precisa apenas implementar.**
 
 ### Por onde comećar?
 
@@ -133,6 +140,8 @@ LEIA TODOS OS PASSOS ANTES DE SAIR FAZENDO, TENHA UMA VISÃO GERAL DO TODO ANTES
    - **IMPORTANTE: NÃO USE O PINO PB4**, pois ele é o mesmo da UART.
 
 1. Parta para a `task_afec`, configure o RTT, AFEC, envio da leitura para a fila `xQueueAFEC`
+
+1. Converta o valor do afec de `0..4095` para `0..255` (o wheel recebe um char!)
 
 1. Implemente a função `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
    - Se quiser debugar, printf ajuda!
