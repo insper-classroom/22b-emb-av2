@@ -1,6 +1,8 @@
-m# 22b - AV2 - LED RGB
+# 22b - AV2 - LED RGB
 
-Nesta avaliação vocês irão criar firmware que aciona um LED RGB de acordo com o valor de um potenciometro. 
+> LEIA TODOS OS PASSOS ANTES DE SAIR FAZENDO, TENHA UMA VISÃO GERAL DO TODO ANTES DE COMECAR.
+
+Nesta avaliação vocês irão criar firmware que aciona um LED RGB de acordo com o valor de um potenciômetro. 
 
 ## Descricão
 
@@ -19,6 +21,7 @@ freeRTOS:
 Componentes:
 
 - LED RGB Catodo comum
+- Potenciômetro
 
 ### O que é um LED RGB?
 
@@ -57,7 +60,7 @@ Na entrega vocês devem utilizar o AFEC para definir qual cor será exibida no L
 
 A entrega deve ser um sistema embarcado que aciona um LED RGB com três PWMs e faz a leitura de um valor analógico via AFEC.
 
-[![](https://img.youtube.com/vi/owp5Dj5Lu-U/maxresdefault.jpg)](https://youtu.be/owp5Dj5Lu-U)
+[![](https://img.youtube.com/vi/4Q7mcvLPfJ4/maxresdefault.jpg)](https://youtu.be/4Q7mcvLPfJ4)
 
 ### Firmware
 
@@ -70,13 +73,13 @@ Vocês devem desenvolver o firmware como indicado a seguir:
 Onde:
 
 - `RTT_Handler`:
-  - Deve gerar uma frequência de 20Hz para inicializar a conversão do AFEC (`afec_start_software_conversion(AFEC_...)`
+  - Deve gerar uma frequência de 10Hz para inicializar a conversão do AFEC (`afec_start_software_conversion(AFEC_...)`
 - `afec_callback`:
   - Funcão de callback do afec que indica que o valor está pronto, deve enviar o valor lido para a fila `xQueueAFEC`
 - `xQueueAFEC`:
   - Fila de inteiro (uint) para envio dos dados lidos do potênciometro.
 - `task_afec`
-    - Configura o RTT em 20Hz 
+    - Configura o RTT em 10Hz 
     - Possui uma fila `xQueueAFEC` para recebimento do valor analógico convertido
     - Chama a função `wheel` para converter um inteiro do AFEC em `RGB`
     - Envia o valor `RGB` para a `task_led` via a fila `xQueueRGB`
@@ -109,21 +112,38 @@ Onde:
     ```
 
     - Note que o input da função é um byte, ou seja, de `0..255` e o nosso analógico é um valor de `0..4095`
-    - Não possuímos a função `setColor`, o Wheel deve retornar o RGB
+    - Não possuímos a função  `setColor(char, r, char g, char b)`, a nossa função `wheel` deve retornar o RGB para enviarmos para a fila
     - DICA: a função deve possuir a seguinte implementacão `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
 
-### Dicas
+### Por onde comećar?
 
-1. Inicialize os pinos do motor, testando os movimentos, fazendo-o girar no sentiro horário e anti-horário
-1. Faça o teste do OLED, `task_modo`, callback dos botões, `xQueueModo`
-1. Crie a fila `xQueueSteps` e comece enviar o dado dos passos
-1. Crie a `task_motor`
-1. Receba os dados da fila `xQueueSteps` e acione o motor
+LEIA TODOS OS PASSOS ANTES DE SAIR FAZENDO, TENHA UMA VISÃO GERAL DO TODO ANTES DE COMECAR.
 
-Para acionar o motor o jeito mais fácil é: criar uma função que recebe uma máscara com as fases e aciona o motor conforme o recebido.
+1. Você vai precisar entender como o PWM funciona, para isso temos um exemplo fresquinho no `SAME70-examples/Perifericos-uC/PWM-LED/`.
+   - Leia o exemplo, entenda o código, execute o exemplo.
+   - **Já use o LED RGB, escolha uma das cores para testar o exemplo**.
+   
+1. No repositório da AV2, crie a `task_led` e incorpore o exemplo recém executado.
 
-```
-int mask_dir0[] = {1, 2, 4, 8};
-```
+1. No final do README do PWM tem uma explicacão de como configurar outro pino para funcionar com PWM canal 1.
+   - Conecte outra cor do LED RGB e faća ele ser controlado por outro PWM.
+   
+1. Agora você só precisa de mais um pino PWM, mas é por sua conta de como fazer.
+   - Conecte a cor restante e faca ela funcionar com um novo PWM, use o canal 2 do PWM0.
+   - **IMPORTANTE: NÃO USE O PINO PB4**, pois ele é o mesmo da UART.
 
-- RTT inicialize ele para gerar uma IRQ a cada `5ms`.
+1. Parta para a `task_afec`, configure o RTT, AFEC, envio da leitura para a fila `xQueueAFEC`
+
+1. Implemente a função `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
+   - Se quiser debugar, printf ajuda!
+
+1. Crie a fila `xQueueRGB` e faća o envio do valor `RGB` para a fila
+
+1. Na `task_led` leia o valor que está chegando na fila e configure cada um dos canais do `PWM` para acionar o duty cycle recebido.
+
+## Rubrica
+
+- [ ] LED varia de acordo com potênciometro respeitando a função `wheel` (gradual do vermelho, passando pelo roxo, azul, verde, amarelo, vermelho)
+- [ ] `task_afec` e `task_led` implementadas
+- [ ] `xQueueAFEC` e `xQueueRGB`
+- [ ] RTT para dar a frequência de amostragem do AFEC (10Hz)
