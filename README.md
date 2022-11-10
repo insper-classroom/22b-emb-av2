@@ -119,7 +119,7 @@ Onde:
  
     - Note que o input da função é um byte, ou seja, de `0..255` e o nosso analógico é um valor de `0..4095`
     - Não possuímos a função  `setColor(char, r, char g, char b)`, a nossa função `wheel` deve retornar o RGB para enviarmos para a fila
-    - DICA: a função deve possuir a seguinte prototipacacao `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
+    - A função deve possuir a seguinte prototipacacao `void wheel( uint WheelPos, uint8_t *r, uint8_t *g, uint8_t *b )`
     - **DICA: no código já tem a função definida, você precisa apenas implementar.**
 
 ### Por onde comećar?
@@ -154,5 +154,6 @@ LEIA TODOS OS PASSOS ANTES DE SAIR FAZENDO, TENHA UMA VISÃO GERAL DO TODO ANTES
 
 - [ ] LED varia de acordo com potênciometro respeitando a função `wheel` (gradual do vermelho, passando pelo roxo, azul, verde, amarelo, vermelho)
 - [ ] `task_afec` e `task_led` implementadas
-- [ ] `xQueueAFEC` e `xQueueRGB`
+- [ ] `xQueueAFEC` e `xQueueRGB` usados para enviar dados
+- [ ] `wheel` implementado
 - [ ] RTT para dar a frequência de amostragem do AFEC (10Hz)
